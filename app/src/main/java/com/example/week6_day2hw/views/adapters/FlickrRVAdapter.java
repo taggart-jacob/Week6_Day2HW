@@ -1,5 +1,8 @@
 package com.example.week6_day2hw.views.adapters;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,16 +14,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.week6_day2hw.R;
-import com.example.week6_day2hw.model.datasource.flickrobjects.FlickrObject;
 import com.example.week6_day2hw.model.datasource.flickrobjects.Item;
+import com.example.week6_day2hw.views.activity.FullSizeFlickr;
 
-import java.util.ArrayList;
 import java.util.List;
-
 
 public class FlickrRVAdapter extends RecyclerView.Adapter<FlickrRVAdapter.ViewHolder> {
 
     List<Item> items;
+    ImageView imgThumb;
 
     public FlickrRVAdapter(List<Item> flickrObject){
         this.items = flickrObject;
@@ -44,6 +46,46 @@ public class FlickrRVAdapter extends RecyclerView.Adapter<FlickrRVAdapter.ViewHo
         holder.tvFlickrTitle.setText(flickrTitle);
         holder.tvFlickrLink.setText(flickrLink);
         Glide.with(holder.imgFlickr).load(imageURL).into(holder.imgFlickr);
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+
+            @Override
+            public boolean onLongClick(final View view) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(view.getContext());
+                dialog.setTitle("Select Image Size");
+                final Intent intent = new Intent(view.getContext(), FullSizeFlickr.class);
+                intent.putExtra("String_needed", imageURL);
+
+
+                dialog.setPositiveButton("Show Large Image", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        view.getContext().startActivity(intent);
+                    }
+
+                });
+
+                dialog.setNegativeButton("Show Regular Size", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        AlertDialog.Builder thumbDialog = new AlertDialog.Builder(view.getContext());
+
+                        LayoutInflater inflater = LayoutInflater.from(view.getContext());
+                        View v = inflater.inflate(R.layout.dialog_flickr_image, null);
+                        imgThumb = v.findViewById(R.id.imgDialog);
+                        thumbDialog.setView(v);
+                        Glide.with(imgThumb).load(imageURL).into(imgThumb);
+                        thumbDialog.create();
+                        thumbDialog.show();
+                    }
+                });
+
+                AlertDialog alertDialog = dialog.create();
+                alertDialog.show();
+                return true;
+            }
+        });
     }
 
     @Override
